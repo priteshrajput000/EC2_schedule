@@ -2,18 +2,18 @@
 var AWS = require('aws-sdk');
 const schedule = require('node-schedule');
 AWS.config.update({
-  aws_access_key_id : 'AKIATKOWCMYTTDQIMK6G',
-  aws_secret_access_key : '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',
+  aws_access_key_id : '***********',
+  aws_secret_access_key : '*****************',
    region: 'ap-south-1'});
 
    var params = {
     InstanceIds: [
-       "i-0c2f40ab9dbb1f88f", "i-01677788880e8c7cb"
+       "****************", "******************"
     ]
    };
    var ec2 = new AWS.EC2({apiVersion: '2016-11-15'});
 
-   schedule.scheduleJob('14 12 * * 1-6', function(){
+   schedule.scheduleJob('* * * * *', function(){
     ec2.startInstances(params, function(err, data) {
       if (err) {
         console.log(err, err.stack);
@@ -26,7 +26,7 @@ AWS.config.update({
     
    });
 
-   schedule.scheduleJob('16 12 * * 1-6', function(){
+   schedule.scheduleJob('* * * * *', function(){
     ec2.stopInstances(params, function(err, data) {
       if (err) {
         console.log("Error", err);       // an error occurred
