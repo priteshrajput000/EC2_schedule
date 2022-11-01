@@ -1,9 +1,9 @@
 var AWS = require('aws-sdk');
 // Set the region 
 AWS.config.update({
-    aws_access_key_id : 'AKIATKOWCMYTTDQIMK6G',
-aws_secret_access_key : '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',
-    region: 'ap-south-1'});
+    aws_access_key_id : '************',
+aws_secret_access_key : '********************',
+    region: '*******'});
 
 // Create EC2 service object
 var ec2 = new AWS.EC2({apiVersion: '2016-11-15'});
