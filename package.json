@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start":"node index.js start i-01677788880e8c7cb i-0c2f40ab9dbb1f88f",
-    "stop":"node index.js stop i-01677788880e8c7cb i-0c2f40ab9dbb1f88f",
+    "start":"node index.js start INSTANCE IDS",
+    "stop":"node index.js stop INSTANCE IDS",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
