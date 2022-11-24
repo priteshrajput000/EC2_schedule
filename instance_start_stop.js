@@ -1,96 +1,80 @@
-
 var AWS = require('aws-sdk');
-const schedule = require('node-schedule');
+const _ = require("lodash");
+
+// Set the region 
 AWS.config.update({
-  aws_access_key_id : '***********',
-  aws_secret_access_key : '*****************',
-   region: 'ap-south-1'});
+    aws_access_key_id : 'AKIATKOWCMYT5SGESEUT',
+aws_secret_access_key : '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',
+    region: 'ap-south-1'});
 
-   var params = {
-    InstanceIds: [
-       "****************", "******************"
-    ]
-   };
-   var ec2 = new AWS.EC2({apiVersion: '2016-11-15'});
+// Create EC2 service object
+var ec2 = new AWS.EC2({apiVersion: '2016-11-15'});
 
-   schedule.scheduleJob('* * * * *', function(){
-    ec2.startInstances(params, function(err, data) {
-      if (err) {
-        console.log(err, err.stack);
-        }                                 // an error occurred
-      else {  
-        console.log('Instance is successfully started!');
-        console.log(data);}               // successful Start response 
-    });
-    
-    
-   });
 
-   schedule.scheduleJob('* * * * *', function(){
-    ec2.stopInstances(params, function(err, data) {
-      if (err) {
-        console.log("Error", err);       // an error occurred
-      } else {
-        console.log("Server stopped Successfully");
-        console.log(data);               // successful Stopped response 
+var currParams = {
+  InstanceIds: [process.argv[3]]
+};
+var params = {
+  InstanceIds: [process.argv[3],process.argv[4]],
+  DryRun: true
+};
+ec2.describeInstances(currParams, async(err, data)=>{
+  if (err) {
+    console.log("Error", err.stack);
+  } else {
+    var InstanceData =await data;
+    const instanceStatus=_.get(InstanceData,["Reservations","0","Instances","0","State","Name"],"Stopped");
+    if(instanceStatus.toUpperCase() === "RUNNING"){
+      
+      if (process.argv[2].toUpperCase() == "STOP") {
+        
+        // Call EC2 to stop the selected instances
+        ec2.stopInstances(params, function(err, data) {
+          if (err && err.code === 'DryRunOperation') {
+            params.DryRun = false;
+            ec2.stopInstances(params, function(err, data) {
+                if (err) {
+                  console.log("Error", err);
+                } else if (data) {
+                  
+                  console.log("Server stopped Successfully", data.StoppingInstances);
+                }
+            });
+          } else
+          {
+            console.log("You don't have permission to stop instances");
+          }
+        });
+      }else{
+        console.log(`${process.argv[3]} is already running`);
       }
-    
-  });
-   });
-  //  ec2.startInstances(params, function(err, data) {
-  //    if (err) console.log(err, err.stack); // an error occurred
-  //    else     console.log(data);           // successful response
-  //    /*
-  //    data = {
-  //     StartingInstances: [
-  //        {
-  //       CurrentState: {
-  //        Code: 0, 
-  //        Name: "pending"
-  //       }, 
-  //       InstanceId: "i-1234567890abcdef0", 
-  //       PreviousState: {
-  //        Code: 80, 
-  //        Name: "stopped"
-  //       }
-  //      }
-  //     ]
-  //    }
-  //    */
-  //  });
-// import { EC2Client, StopInstancesCommand } from "@aws-sdk/client-ec2"; 
-// const { EC2Client, StartInstancesCommand, StopInstancesCommand } = require("@aws-sdk/client-ec2") ;
+    }else{
+      
+      if (process.argv[2].toUpperCase() == "START" ) {
+        console.log("instance is starting");
+        // Call EC2 to start the selected instances
+        ec2.startInstances(params, function(err, data) {
+          if (err && err.code === 'DryRunOperation') {
+            params.DryRun = false;
+            ec2.startInstances(params, function(err, data) {
+                if (err) {
+                  console.log("Error", err);
+                } else if (data) {
+                  
+                  console.log("Server started Successfully", data.StartingInstances);
+                }
+            });
+      
+      
+          } else {
+            console.log("You don't have permission to start instances.");
+          }
+         
+        });
+      } 
+      
+    }
 
-// const ec2Client = new EC2Client({ region: ap-south-1 });
-// import { EC2Client, StopInstancesCommand } from "@aws-sdk/client-ec2"; // ES Modules import
-// const { EC2Client, StopInstancesCommand } = require("@aws-sdk/client-ec2"); 
-// const client = new EC2Client();
-// const command = new StopInstancesCommand(input);
-
-
-// const params = { InstanceIds: ["i-0c2f40ab9dbb1f88f, i-01677788880e8c7cb"] };
-// // const command = "START";
-
-// const run = async () => {
-//   const response = await client.send(command);
-//   console.log(response);
-//   return response;
-  // if (command.toUpperCase() === "START") {
-  //   try {
-  //     const data = await ec2Client.send(new StartInstancesCommand(params));
-  //     console.log("Success", data.StartingInstances);
-  //     return data;
-  //   } catch (err) {
-  //     console.log("Error2", err);
-  //   }
-  // } else if (process.argv[2].toUpperCase() === "STOP") {
-  //   try {
-  //     const data = await ec2Client.send(new StopInstancesCommand(params));
-  //     console.log("Success", data.StoppingInstances);
-  //     return data;
-  //   } catch (err) {
-  //     console.log("Error", err);
-  //   }
-  // }
-// };
-// run();
+  }
+}
+);
